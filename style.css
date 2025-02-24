@@ -6,7 +6,7 @@ body {
     height: 100vh;
     margin: 0;
     background-color: #f0f0f0;
-    overflow: hidden; /* 페이지 스크롤 방지 */
+    overflow: hidden;
 }
 
 .container {
@@ -42,7 +42,7 @@ button:hover {
 .cube-container {
     perspective: 1000px;
     margin-top: 50px;
-    user-select: none; /* 텍스트 선택 방지 */
+    user-select: none;
 }
 
 .cube {
@@ -51,11 +51,11 @@ button:hover {
     height: 200px;
     transform-style: preserve-3d;
     transition: transform 0.1s;
-    cursor: grab; /* 드래그 가능 커서 */
+    cursor: grab;
 }
 
 .cube:active {
-    cursor: grabbing; /* 드래그 중 커서 */
+    cursor: grabbing;
 }
 
 .face {
@@ -63,13 +63,8 @@ button:hover {
     width: 200px;
     height: 200px;
     background-color: rgba(100, 149, 237, 0.8);
-    color: white;
-    font-size: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     border: 1px solid #fff;
-    pointer-events: none; /* 면 개별 클릭 방지 */
+    pointer-events: none;
 }
 
 .front  { transform: translateZ(100px); }
@@ -79,3 +74,18 @@ button:hover {
 .top    { transform: translateY(-100px) rotateX(90deg); }
 .bottom { transform: translateY(100px) rotateX(-90deg); }
 
+/* 10x10 메시의 작은 사각형 스타일 */
+.mesh-cell {
+    position: absolute;
+    width: 20px; /* 200px / 10 */
+    height: 20px; /* 200px / 10 */
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 10px;
+    color: white;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
