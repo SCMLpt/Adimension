@@ -1,77 +1,77 @@
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
+/* 기본 리셋 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.container {
-    text-align: center;
+/* 3D 씬 컨테이너 (원근감 적용) */
+.scene {
+  width: 400px;
+  height: 400px;
+  margin: 50px auto;
+  perspective: 800px;
+  border: 2px solid #ccc;
 }
 
-h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
-}
-
-input {
-    padding: 10px;
-    font-size: 16px;
-    width: 200px;
-    margin-right: 10px;
-}
-
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-}
-
-button:hover {
-    background-color: #45a049;
-}
-
-.cube-container {
-    perspective: 1000px;
-    margin-top: 50px;
-}
-
+/* 정육면체 스타일 */
 .cube {
-    position: relative;
-    width: 200px;
-    height: 200px;
-    transform-style: preserve-3d;
-    animation: rotate 20s infinite linear;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1s;
 }
 
+/* 정육면체 면 스타일 */
 .face {
-    position: absolute;
-    width: 200px;
-    height: 200px;
-    background-color: rgba(100, 149, 237, 0.8);
-    color: white;
-    font-size: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid #fff;
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2em;
 }
 
-.front  { transform: translateZ(100px); }
-.back   { transform: translateZ(-100px) rotateY(180deg); }
-.left   { transform: translateX(-100px) rotateY(-90deg); }
-.right  { transform: translateX(100px) rotateY(90deg); }
-.top    { transform: translateY(-100px) rotateX(90deg); }
-.bottom { transform: translateY(100px) rotateX(-90deg); }
+/* 면 배치 */
+.front {
+  transform: translateZ(190px);
+}
+.back {
+  transform: rotateY(180deg) translateZ(190px);
+}
+.right {
+  transform: rotateY(90deg) translateZ(190px);
+}
+.left {
+  transform: rotateY(-90deg) translateZ(190px);
+}
+.top {
+  transform: rotateX(90deg) translateZ(190px);
+}
+.bottom {
+  transform: rotateX(-90deg) translateZ(190px);
+}
 
-@keyframes rotate {
-    0% { transform: rotateX(0deg) rotateY(0deg); }
-    100% { transform: rotateX(360deg) rotateY(360deg); }
+/* 채팅 입력 영역 스타일 */
+.chat-container {
+  width: 400px;
+  margin: 20px auto;
+  text-align: center;
+}
+
+#chat-input {
+  width: 70%;
+  padding: 10px;
+  font-size: 1em;
+}
+
+#send-btn {
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
 }
