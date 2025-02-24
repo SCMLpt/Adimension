@@ -106,7 +106,7 @@ async function updateCube() {
     });
     selectedCell.appendChild(linkElement);
 
-    // 서버에 데이터 저장 (새 ngrok URL 사용)
+    // 서버에 데이터 저장 (ngrok URL 사용)
     const cubeData = { keyword, link, userId, faceIndex: newFaceIndex, cellIndex: newCellIndex };
     try {
         console.log("Attempting to save data to server with data:", cubeData);
@@ -125,7 +125,6 @@ async function updateCube() {
         console.log("Data saved to localStorage successfully.");
     } catch (error) {
         console.error("Failed to save data:", error);
-        // 에러 세부 정보 로깅 (CORS, 네트워크 문제 등)
         if (error instanceof TypeError) {
             console.error("Network error or CORS issue:", error.message);
         } else if (error.message.includes("HTTP error")) {
@@ -138,26 +137,30 @@ async function updateCube() {
     document.getElementById("linkInput").value = "";
 }
 
-// 페이지 로드 시 모든 사용자 데이터 로드 (새 ngrok URL 사용)
+// 페이지 로드 시 모든 사용자 데이터 로드 (ngrok URL 사용)
 async function loadAllData() {
     try {
         console.log("Attempting to load all cube data from server...");
-        const response = await fetch('https://08b8-2001-2d8-7381-8b9a-6cf1-5464-b95a-8960.ngrok-free.app/cube/load/all');
+        const response = await fetch('https://08b8-2001-2d8-7381-8b9a-6cf1-5464-b95a-8960.ngrok-free.app/cube/load/all', {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
         }
-        // 응답 텍스트를 먼저 로그로 출력 (JSON 파싱 전에 확인)
-        const textResponse = await response.text();
-        console.log("Server response (text):", textResponse);
-        // JSON 파싱 시도
-        const allData = JSON.parse(textResponse);
-        console.log("Server response for all data (parsed):", JSON.stringify(allData, null, 2));
+        const allData = await response.json();
+        console.log("Server response for all data:", JSON.stringify(allData, null, 2));
+
+        // 서버에서 데이터가 없으면 테스트 데이터 추가 (디버깅용)
+        if (Object.keys(allData).length === 0) {
+            console.log("No data from server, using test data...");
+            allData["test_user"] = { keyword: "Test", link: "https://example.com", faceIndex: 0, cellIndex: 0 };
+        }
+
         for (const [userId, data] of Object.entries(allData)) {
-            console.log(`Processing data for user ${userId}:`, data);
             if (userId !== getUserId()) {
-                console.log(`Rendering data for user ${userId} (not current user):`, data);
+                console.log(`Rendering data for user ${userId}:`, data);
                 const { keyword, link, faceIndex, cellIndex } = data;
-                console.log(`Rendering data: keyword=${keyword}, link=${link}, faceIndex=${faceIndex}, cellIndex=${cellIndex}`);
                 const faces = document.getElementsByClassName("face");
                 if (faceIndex >= 0 && faceIndex < faces.length) {
                     const selectedFace = faces[faceIndex];
@@ -202,7 +205,6 @@ async function loadAllData() {
         console.log("All cube data loaded and rendered successfully.");
     } catch (error) {
         console.error("Failed to load data:", error);
-        // 에러 세부 정보 로깅 (CORS, 네트워크 문제 등)
         if (error instanceof SyntaxError) {
             console.error("JSON parsing error - Server returned invalid JSON:", error.message);
         } else if (error instanceof TypeError) {
@@ -210,12 +212,16 @@ async function loadAllData() {
         } else if (error.message.includes("HTTP error")) {
             console.error("Server responded with an error:", error.message);
         }
+        console.error("Full error object:", error);
     }
 }
 
-// 페이지 로드 시 데이터 로드
+// 페이지 로드 시 데이터 로드 및 주기적 업데이트 설정
 window.onload = function() {
+    // 초기 데이터 로드
     loadAllData();
+
+    // 현재 사용자 데이터 로드 (로컬 저장소에서)
     const userId = getUserId();
     const savedData = localStorage.getItem(`cubeData_${userId}`);
     if (savedData) {
@@ -257,4 +263,7 @@ window.onload = function() {
             console.warn(`Invalid faceIndex ${faceIndex} for user ${userId} - out of range for ${faces.length} faces`);
         }
     }
+
+    // 주기적으로 데이터 업데이트 (10초마다)
+    setInterval(loadAllData, 10000); // 10000ms = 10초
 };
