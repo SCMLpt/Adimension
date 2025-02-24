@@ -18,7 +18,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rotating Cube Chat</title>
-    <link rel="stylesheet" href="style.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -174,10 +173,13 @@
             </ul>
         </nav>
         <h1>Display Keyword & Link on a Cube</h1>
+
+        <!-- Input fields and button -->
         <input type="text" id="keywordInput" placeholder="Enter keyword here" />
         <input type="text" id="linkInput" placeholder="Enter link here (e.g., https://example.com)" />
         <button onclick="updateCube()">Submit</button>
 
+        <!-- Cube Container -->
         <div class="cube-container">
             <div id="cube" class="cube">
                 <div class="face front"></div>
@@ -190,19 +192,22 @@
         </div>
     </div>
 
-    <!-- Inline script for cube logic -->
     <script>
-    const cube = document.getElementById('cube');
+    // Replace the BASE_URL with your ngrok forwarding address
+    const BASE_URL = "https://d12f-2001-2d8-7381-8b9a-4cb2-2f1d-f131-9fdf.ngrok-free.app";
+
+    const cube = document.getElementById("cube");
     let isDragging = false;
     let previousX = 0;
     let previousY = 0;
     let rotationX = 0;
     let rotationY = 0;
 
-    // Drag logic for rotating cube
-    cube.addEventListener('mousedown', (e) => {
-        // Avoid dragging when clicking on links
-        if (e.target.className !== 'mesh-cell' && e.target.tagName !== 'A') {
+    // --------------------------
+    // Drag Logic
+    // --------------------------
+    cube.addEventListener("mousedown", (e) => {
+        if (e.target.className !== "mesh-cell" && e.target.tagName !== "A") {
             isDragging = true;
             previousX = e.clientX;
             previousY = e.clientY;
@@ -210,7 +215,7 @@
         }
     });
 
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener("mousemove", (e) => {
         if (isDragging) {
             const deltaX = e.clientX - previousX;
             const deltaY = e.clientY - previousY;
@@ -222,104 +227,101 @@
         }
     });
 
-    document.addEventListener('mouseup', () => { isDragging = false; });
-    document.addEventListener('mouseleave', () => { isDragging = false; });
+    document.addEventListener("mouseup", () => { isDragging = false; });
+    document.addEventListener("mouseleave", () => { isDragging = false; });
 
-    // On page load, fetch existing cube data from the server
+    // --------------------------
+    // On Page Load: GET Cube Data
+    // --------------------------
     window.onload = function() {
-        fetch('/cube/get')
+        fetch(`${BASE_URL}/cube/get`)
             .then(res => res.json())
             .then(data => {
-                // If there is existing data, render it
                 if (data && data.keyword) {
                     renderCube(data);
                 }
             })
-            .catch(err => console.error('Error fetching cube data:', err));
+            .catch(err => console.error("Error fetching cube data:", err));
     };
 
-    // Render the cube with the given data
-    function renderCube(data) {
-        const { keyword, link, faceIndex, cellIndex } = data;
-
-        const faces = document.getElementsByClassName('face');
-        // Clear the targeted face
+    // --------------------------
+    // Render the Cube
+    // --------------------------
+    function renderCube({ keyword, link, faceIndex, cellIndex }) {
+        // Clear the selected face
+        const faces = document.getElementsByClassName("face");
         const selectedFace = faces[faceIndex];
-        selectedFace.innerHTML = '';
+        selectedFace.innerHTML = "";
 
-        // Create a 10x10 grid for that face
+        // Generate 10x10 mesh grid
         for (let i = 0; i < 10; i++) {
             for (let j = 0; j < 10; j++) {
-                const cell = document.createElement('div');
-                cell.className = 'mesh-cell';
+                const cell = document.createElement("div");
+                cell.className = "mesh-cell";
                 cell.style.left = `${j * 20}px`;
                 cell.style.top = `${i * 20}px`;
                 selectedFace.appendChild(cell);
             }
         }
 
-        // Place link on the specified cell
-        const cells = selectedFace.getElementsByClassName('mesh-cell');
+        // Insert link into the specified cell
+        const cells = selectedFace.getElementsByClassName("mesh-cell");
         const selectedCell = cells[cellIndex];
 
-        // Create link element
-        const linkElement = document.createElement('a');
+        const linkElement = document.createElement("a");
         linkElement.href = link;
         linkElement.textContent = keyword;
-        linkElement.target = '_blank';
-        linkElement.addEventListener('click', (e) => {
-            console.log('Link clicked:', link);
+        linkElement.target = "_blank";
+        linkElement.addEventListener("click", (e) => {
+            console.log("Link clicked:", link);
             e.stopPropagation();
         });
         selectedCell.appendChild(linkElement);
     }
 
-    // Called when user clicks 'Submit'
+    // --------------------------
+    // Submit Handler
+    // --------------------------
     function updateCube() {
-        const keyword = document.getElementById('keywordInput').value.trim();
-        let link = document.getElementById('linkInput').value.trim();
+        const keyword = document.getElementById("keywordInput").value.trim();
+        let link = document.getElementById("linkInput").value.trim();
 
         if (!keyword || !link) {
-            alert('Please enter both a keyword and a link!');
+            alert("Please enter both a keyword and a link!");
             return;
         }
 
         // Ensure link has http or https
         if (!/^https?:\\/\\//i.test(link)) {
-            link = 'https://' + link;
+            link = "https://" + link;
         }
 
-        // Random face and cell for demonstration
-        const faceIndex = Math.floor(Math.random() * 6);  // 6 faces
-        const cellIndex = Math.floor(Math.random() * 100); // 10x10 cells
+        // Random face & cell for demonstration
+        const faceIndex = Math.floor(Math.random() * 6);   // 6 faces
+        const cellIndex = Math.floor(Math.random() * 100); // 10x10 => 100 cells
 
-        const data = {
-            keyword,
-            link,
-            faceIndex,
-            cellIndex
-        };
+        const cubeData = { keyword, link, faceIndex, cellIndex };
 
-        // POST the new cube data to the server
-        fetch('/cube/update', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+        // POST to the server to update
+        fetch(`${BASE_URL}/cube/update`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(cubeData)
         })
-        .then(res => res.json())
+        .then(response => response.json())
         .then(result => {
-            if (result.status === 'success') {
-                // Re-render the cube with updated data
+            if (result.status === "success") {
+                // Render the updated cube data
                 renderCube(result.cube_data);
             } else {
-                console.error('Error updating cube:', result.error);
+                console.error("Error updating cube:", result.error);
             }
         })
-        .catch(err => console.error('Error posting cube data:', err));
+        .catch(err => console.error("Error posting updateCube request:", err));
 
-        // Clear inputs
-        document.getElementById('keywordInput').value = '';
-        document.getElementById('linkInput').value = '';
+        // Clear input fields
+        document.getElementById("keywordInput").value = "";
+        document.getElementById("linkInput").value = "";
     }
     </script>
 </body>
