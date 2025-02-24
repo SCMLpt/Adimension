@@ -1,30 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Chat Cube</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotating Cube Chat</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- 채팅 입력 영역 -->
-  <div class="chat-container">
-    <input type="text" id="chat-input" placeholder="메시지를 입력하세요">
-    <button id="send-btn">전송</button>
-  </div>
-
-  <!-- 3D 정육면체를 포함하는 씬 -->
-  <div class="scene">
-    <div class="cube" id="cube">
-      <div class="face front">안녕하세요!</div>
-      <div class="face back">안녕하세요!</div>
-      <div class="face right">안녕하세요!</div>
-      <div class="face left">안녕하세요!</div>
-      <div class="face top">안녕하세요!</div>
-      <div class="face bottom">안녕하세요!</div>
+    <div class="container">
+        <h1>Display Text on a Cube</h1>
+        <input type="text" id="chatInput" placeholder="Enter text here" />
+        <button onclick="updateCube()">Submit</button>
+        <div class="cube-container">
+            <div id="cube" class="cube">
+                <div class="face front">Default Text</div>
+                <div class="face back">Default Text</div>
+                <div class="face left">Default Text</div>
+                <div class="face right">Default Text</div>
+                <div class="face top">Default Text</div>
+                <div class="face bottom">Default Text</div>
+            </div>
+        </div>
     </div>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
