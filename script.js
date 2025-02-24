@@ -1,67 +1,52 @@
-const cube = document.getElementById('cube');
-const input = document.getElementById('chat-input');
-const sendBtn = document.getElementById('send-btn');
-const faces = document.querySelectorAll('.face');
+const cube = document.getElementById("cube");
+let isDragging = false;
+let previousX = 0;
+let previousY = 0;
+let rotationX = 0;
+let rotationY = 0;
 
-// 모든 면에 텍스트를 업데이트하는 함수
-function updateCubeText(text) {
-  faces.forEach(face => {
-    face.textContent = text;
-  });
+// 텍스트 업데이트 함수
+function updateCube() {
+    const input = document.getElementById("chatInput").value;
+    if (input.trim() !== "") {
+        const faces = document.getElementsByClassName("face");
+        for (let i = 0; i < faces.length; i++) {
+            faces[i].textContent = input;
+        }
+        document.getElementById("chatInput").value = "";
+    }
 }
 
-sendBtn.addEventListener('click', () => {
-  const text = input.value.trim();
-  if(text !== ''){
-    updateCubeText(text);
-    input.value = '';
-  }
+// 드래그 시작
+cube.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    previousX = e.clientX;
+    previousY = e.clientY;
+    e.preventDefault(); // 기본 동작(스크롤 등) 방지
 });
 
-// 마우스 드래그로 정육면체 회전 구현
-let startX, startY, currentX = 0, currentY = 0, isDragging = false;
+// 드래그 중
+document.addEventListener("mousemove", (e) => {
+    if (isDragging) {
+        const deltaX = e.clientX - previousX;
+        const deltaY = e.clientY - previousY;
 
-document.querySelector('.scene').addEventListener('mousedown', (e) => {
-  isDragging = true;
-  startX = e.clientX;
-  startY = e.clientY;
+        rotationY += deltaX * 0.5; // Y축 회전
+        rotationX -= deltaY * 0.5; // X축 회전
+
+        cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+
+        previousX = e.clientX;
+        previousY = e.clientY;
+    }
 });
 
-document.addEventListener('mousemove', (e) => {
-  if(isDragging) {
-    const deltaX = e.clientX - startX;
-    const deltaY = e.clientY - startY;
-    currentX += deltaY * 0.5;
-    currentY += deltaX * 0.5;
-    cube.style.transform = `rotateX(${currentX}deg) rotateY(${currentY}deg)`;
-    startX = e.clientX;
-    startY = e.clientY;
-  }
+// 드래그 종료
+document.addEventListener("mouseup", () => {
+    isDragging = false;
 });
 
-document.addEventListener('mouseup', () => {
-  isDragging = false;
-});
-
-// 터치 이벤트로 회전 구현 (모바일 지원)
-document.querySelector('.scene').addEventListener('touchstart', (e) => {
-  isDragging = true;
-  startX = e.touches[0].clientX;
-  startY = e.touches[0].clientY;
-});
-
-document.addEventListener('touchmove', (e) => {
-  if(isDragging) {
-    const deltaX = e.touches[0].clientX - startX;
-    const deltaY = e.touches[0].clientY - startY;
-    currentX += deltaY * 0.5;
-    currentY += deltaX * 0.5;
-    cube.style.transform = `rotateX(${currentX}deg) rotateY(${currentY}deg)`;
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-  }
-});
-
-document.addEventListener('touchend', () => {
-  isDragging = false;
+// 문서 밖으로 나가도 드래그 종료
+document.addEventListener("mouseleave", () => {
+    isDragging = false;
 });
