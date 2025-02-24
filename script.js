@@ -40,13 +40,18 @@ document.addEventListener("mouseleave", () => {
 });
 
 // 텍스트 업데이트 함수
-function updateCube(){
+function updateCube() {
     const keyword = document.getElementById("keywordInput").value.trim();
-    const link = document.getElementById("linkInput").value.trim();
+    let link = document.getElementById("linkInput").value.trim();
 
     if (keyword === "" || link === "") {
         alert("Please enter both a keyword and a link!");
         return;
+    }
+
+    // 링크가 http 또는 https로 시작하지 않으면 추가
+    if (!link.startsWith("http://") && !link.startsWith("https://")) {
+        link = "https://" + link; // 기본적으로 https로 설정
     }
 
     // 모든 면 가져오기
@@ -82,7 +87,12 @@ function updateCube(){
     linkElement.href = link;
     linkElement.textContent = keyword;
     linkElement.target = "_blank"; // 새 탭에서 열리도록
-    linkElement.style.pointerEvents = "auto"; // 링크 클릭 명시적 허용
+    linkElement.style.pointerEvents = "auto"; // 링크 클릭 가능하도록 명시
+    linkElement.addEventListener("click", (e) => {
+        // 클릭 시 콘솔에 로그 추가 (디버깅용)
+        console.log("Link clicked:", link);
+        e.stopPropagation(); // 이벤트 버블링 방지
+    });
     selectedCell.appendChild(linkElement);
 
     // 입력창 초기화
