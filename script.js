@@ -1,3 +1,6 @@
+// Replace this with your ngrok URL
+const BASE_URL = "https://d12f-2001-2d8-7381-8b9a-4cb2-2f1d-f131-9fdf.ngrok-free.app";
+
 const cube = document.getElementById("cube");
 let isDragging = false;
 let previousX = 0;
@@ -5,17 +8,13 @@ let previousY = 0;
 let rotationX = 0;
 let rotationY = 0;
 
-// 고유 사용자 ID 생성 (IP 대신 사용)
-function getUserId() {
-    let userId = localStorage.getItem("userId");
-    if (!userId) {
-        userId = "user_" + Math.random().toString(36).substr(2, 9); // 랜덤 고유 ID
-        localStorage.setItem("userId", userId);
-    }
-    return userId;
-}
+// Store the server's current cube data in a global variable
+// so we know whether to reuse faceIndex/cellIndex
+let currentCubeData = null;
 
-// 드래그 기능
+// --------------------------
+// DRAG LOGIC
+// --------------------------
 cube.addEventListener("mousedown", (e) => {
     if (e.target.className !== "mesh-cell" && e.target.tagName !== "A") {
         isDragging = true;
@@ -48,83 +47,35 @@ document.addEventListener("mouseleave", () => {
     isDragging = false;
 });
 
-// 페이지 로드 시 저장된 데이터 복원 (영구적으로 유지)
+// --------------------------
+// ON PAGE LOAD
+// --------------------------
 window.onload = function() {
-    const userId = getUserId();
-    const savedData = localStorage.getItem(`cubeData_${userId}`);
-    if (savedData) {
-        const { keyword, link, faceIndex, cellIndex } = JSON.parse(savedData);
-        const faces = document.getElementsByClassName("face");
-        const selectedFace = faces[faceIndex];
-        selectedFace.innerHTML = "";
-
-        // 10x10 메시 생성
-        for (let i = 0; i < 10; i++) {
-            for (let j = 0; j < 10; j++) {
-                const cell = document.createElement("div");
-                cell.className = "mesh-cell";
-                cell.style.left = `${j * 20}px`;
-                cell.style.top = `${i * 20}px`;
-                selectedFace.appendChild(cell);
+    // Fetch existing cube data from the server
+    fetch(`${BASE_URL}/cube/get`)
+        .then(response => response.json())
+        .then(data => {
+            // If the server has valid data, store & render it
+            if (data && data.keyword) {
+                currentCubeData = data;
+                renderCube(data);
             }
-        }
-
-        const cells = selectedFace.getElementsByClassName("mesh-cell");
-        const selectedCell = cells[cellIndex];
-
-        // 링크 요소 생성
-        const linkElement = document.createElement("a");
-        linkElement.href = link;
-        linkElement.textContent = keyword;
-        linkElement.target = "_blank";
-        linkElement.style.pointerEvents = "auto";
-        linkElement.addEventListener("click", (e) => {
-            console.log("Link clicked:", link);
-            e.stopPropagation();
-        });
-        selectedCell.appendChild(linkElement);
-    }
+        })
+        .catch(err => console.error("Error fetching cube data:", err));
 };
 
-// 텍스트 업데이트 함수
-function updateCube() {
-    const keyword = document.getElementById("keywordInput").value.trim();
-    let link = document.getElementById("linkInput").value.trim();
-
-    if (keyword === "" || link === "") {
-        alert("Please enter both a keyword and a link!");
-        return;
-    }
-
-    // 링크가 http 또는 https로 시작하지 않으면 추가
-    if (!link.startsWith("http://") && !link.startsWith("https://")) {
-        link = "https://" + link;
-    }
-
-    const userId = getUserId();
-    const savedData = localStorage.getItem(`cubeData_${userId}`);
-
-    // 모든 면 가져오기
+// --------------------------
+// RENDER THE CUBE
+// --------------------------
+function renderCube({ keyword, link, faceIndex, cellIndex }) {
+    // Get the target face
     const faces = document.getElementsByClassName("face");
+    const selectedFace = faces[faceIndex];
 
-    let selectedFace, faceIndex, cellIndex;
-    if (savedData) {
-        // 기존 데이터가 있으면 같은 위치 사용
-        const { faceIndex: oldFaceIndex, cellIndex: oldCellIndex } = JSON.parse(savedData);
-        faceIndex = oldFaceIndex;
-        cellIndex = oldCellIndex;
-        selectedFace = faces[faceIndex];
-    } else {
-        // 새 데이터면 랜덤 위치 선택
-        faceIndex = Math.floor(Math.random() * faces.length);
-        selectedFace = faces[faceIndex];
-        cellIndex = Math.floor(Math.random() * 100); // 10x10 = 100 셀
-    }
-
-    // 기존 메시 제거
+    // Clear any existing grid on that face
     selectedFace.innerHTML = "";
 
-    // 10x10 메시 생성
+    // Create a 10x10 grid
     for (let i = 0; i < 10; i++) {
         for (let j = 0; j < 10; j++) {
             const cell = document.createElement("div");
@@ -135,35 +86,75 @@ function updateCube() {
         }
     }
 
-    // 메시의 셀들 가져오기
+    // Place the link in the specified cell
     const cells = selectedFace.getElementsByClassName("mesh-cell");
     const selectedCell = cells[cellIndex];
 
-    // 기존 링크 제거 (필요 시)
-    selectedCell.innerHTML = "";
-
-    // 링크 요소 생성
     const linkElement = document.createElement("a");
     linkElement.href = link;
     linkElement.textContent = keyword;
     linkElement.target = "_blank";
-    linkElement.style.pointerEvents = "auto";
     linkElement.addEventListener("click", (e) => {
         console.log("Link clicked:", link);
         e.stopPropagation();
     });
     selectedCell.appendChild(linkElement);
+}
 
-    // 데이터 영구 저장 (localStorage 사용)
-    const cubeData = {
+// --------------------------
+// UPDATE CUBE
+// --------------------------
+function updateCube() {
+    const keyword = document.getElementById("keywordInput").value.trim();
+    let link = document.getElementById("linkInput").value.trim();
+
+    if (!keyword || !link) {
+        alert("Please enter both a keyword and a link!");
+        return;
+    }
+
+    // Ensure the link starts with http or https
+    if (!/^https?:\\/\\//i.test(link)) {
+        link = "https://" + link;
+    }
+
+    // Decide whether to reuse existing face/cell or pick new random
+    let faceIndex, cellIndex;
+    if (currentCubeData && currentCubeData.keyword) {
+        faceIndex = currentCubeData.faceIndex;
+        cellIndex = currentCubeData.cellIndex;
+    } else {
+        faceIndex = Math.floor(Math.random() * 6);   // 6 faces
+        cellIndex = Math.floor(Math.random() * 100); // 10x10 grid = 100 cells
+    }
+
+    const newCubeData = {
         keyword,
         link,
         faceIndex,
         cellIndex
     };
-    localStorage.setItem(`cubeData_${userId}`, JSON.stringify(cubeData));
 
-    // 입력창 초기화
+    // POST to server to update the shared data
+    fetch(`${BASE_URL}/cube/update`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newCubeData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            // Update our local reference & re-render
+            currentCubeData = data.cube_data;
+            renderCube(data.cube_data);
+        } else {
+            console.error("Error updating cube:", data.error);
+        }
+    })
+    .catch(err => console.error("Error sending updateCube request:", err));
+
+    // Clear input fields
     document.getElementById("keywordInput").value = "";
     document.getElementById("linkInput").value = "";
 }
+
