@@ -138,16 +138,20 @@ async function updateCube() {
     document.getElementById("linkInput").value = "";
 }
 
-// 페이지 로드 시 모든 사용자 데이터 로드 (디버깅 강화)
+// 페이지 로드 시 모든 사용자 데이터 로드
 async function loadAllData() {
     try {
         console.log("Attempting to load all cube data from server...");
-        const response = await fetch('https://a45a-2001-2d8-7381-8b9a-4cb2-2f1d-f131-9fdf.ngrok-free.app/cube/load/all');
+        const response = await fetch('https://d12f-2001-2d8-7381-8b9a-4cb2-2f1d-f131-9fdf.ngrok-free.app/cube/load/all');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
         }
-        const allData = await response.json();
-        console.log("Server response for all data (raw):", JSON.stringify(allData, null, 2));
+        // 응답 텍스트를 먼저 로그로 출력 (JSON 파싱 전에 확인)
+        const textResponse = await response.text();
+        console.log("Server response (text):", textResponse);
+        // JSON 파싱 시도
+        const allData = JSON.parse(textResponse);
+        console.log("Server response for all data (parsed):", JSON.stringify(allData, null, 2));
         for (const [userId, data] of Object.entries(allData)) {
             console.log(`Processing data for user ${userId}:`, data);
             if (userId !== getUserId()) {
@@ -199,7 +203,9 @@ async function loadAllData() {
     } catch (error) {
         console.error("Failed to load data:", error);
         // 에러 세부 정보 로깅 (CORS, 네트워크 문제 등)
-        if (error instanceof TypeError) {
+        if (error instanceof SyntaxError) {
+            console.error("JSON parsing error - Server returned invalid JSON:", error.message);
+        } else if (error instanceof TypeError) {
             console.error("Network error or CORS issue:", error.message);
         } else if (error.message.includes("HTTP error")) {
             console.error("Server responded with an error:", error.message);
