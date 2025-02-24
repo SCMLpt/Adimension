@@ -1,3 +1,5 @@
+// script.js
+
 const cube = document.getElementById("cube");
 let isDragging = false;
 let previousX = 0;
@@ -45,6 +47,18 @@ document.addEventListener("mouseup", () => {
 document.addEventListener("mouseleave", () => {
     isDragging = false;
 });
+
+// 텍스트 크기 조절 함수
+function adjustFontSize(element) {
+    let fontSize = 10; // 초기 폰트 크기
+    element.style.fontSize = fontSize + "px";
+    const parentWidth = element.parentElement.offsetWidth;
+
+    while (element.scrollWidth > parentWidth && fontSize > 4) {
+        fontSize--;
+        element.style.fontSize = fontSize + "px";
+    }
+}
 
 // 텍스트 업데이트 및 서버 저장 함수
 async function updateCube() {
@@ -95,11 +109,10 @@ async function updateCube() {
     linkElement.textContent = keyword;
     linkElement.target = "_blank";
     linkElement.style.pointerEvents = "auto";
-    linkElement.addEventListener("click", (e) => {
-        console.log("Link clicked:", link);
-        e.stopPropagation();
-    });
+
+    // 폰트 크기 조절 적용
     selectedCell.appendChild(linkElement);
+    adjustFontSize(linkElement);
 
     const cubeData = { keyword, link, userId, faceIndex: newFaceIndex, cellIndex: newCellIndex };
     try {
@@ -166,11 +179,11 @@ async function loadAllData() {
                     linkElement.textContent = keyword;
                     linkElement.target = "_blank";
                     linkElement.style.pointerEvents = "auto";
-                    linkElement.addEventListener("click", (e) => {
-                        console.log("Link clicked:", link);
-                        e.stopPropagation();
-                    });
+
+                    // 폰트 크기 조절 적용
                     selectedCell.appendChild(linkElement);
+                    adjustFontSize(linkElement);
+
                     console.log(`Rendered data for user ${userId} at face ${faceIndex}, cell ${cellIndex}`);
                 } else {
                     console.warn(`Invalid cellIndex ${cellIndex} for user ${userId}`);
@@ -189,3 +202,4 @@ window.onload = function() {
     loadAllData();
     setInterval(loadAllData, 10000); // 10초마다 업데이트
 };
+
