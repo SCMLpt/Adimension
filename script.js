@@ -48,7 +48,7 @@ document.addEventListener("mouseleave", () => {
     isDragging = false;
 });
 
-// 텍스트 업데이트 및 서버 저장 함수
+// 텍스트 업데이트 및 서버 저장 함수 (네트워크 문제 점검 추가)
 async function updateCube() {
     const keyword = document.getElementById("keywordInput").value.trim();
     let link = document.getElementById("linkInput").value.trim();
@@ -105,18 +105,31 @@ async function updateCube() {
     });
     selectedCell.appendChild(linkElement);
 
-    // 서버에 데이터 저장 (제공된 ngrok 주소 사용)
+    // 서버에 데이터 저장 (네트워크 문제 점검 추가)
     const cubeData = { keyword, link, userId, faceIndex: newFaceIndex, cellIndex: newCellIndex };
     try {
-        await fetch('https://d12f-2001-2d8-7381-8b9a-4cb2-2f1d-f131-9fdf.ngrok-free.app/cube/save', {
+        console.log("Attempting to save data to server...");
+        const response = await fetch('https://d12f-2001-2d8-7381-8b9a-4cb2-2f1d-f131-9fdf.ngrok-free.app/cube/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(cubeData)
         });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+        }
+        const data = await response.json();
+        console.log("Server response:", data);
         // 로컬 저장소에도 백업 (안정성 확보)
         localStorage.setItem(`cubeData_${userId}`, JSON.stringify(cubeData));
+        console.log("Data saved to localStorage successfully.");
     } catch (error) {
         console.error("Failed to save data:", error);
+        // 에러 세부 정보 로깅 (CORS, 네트워크 문제 등)
+        if (error instanceof TypeError) {
+            console.error("Network error or CORS issue:", error.message);
+        } else if (error.message.includes("HTTP error")) {
+            console.error("Server responded with an error:", error.message);
+        }
     }
 
     // 입력창 초기화
@@ -124,11 +137,16 @@ async function updateCube() {
     document.getElementById("linkInput").value = "";
 }
 
-// 페이지 로드 시 모든 사용자 데이터 로드
+// 페이지 로드 시 모든 사용자 데이터 로드 (네트워크 문제 점검 추가)
 async function loadAllData() {
     try {
+        console.log("Attempting to load all cube data from server...");
         const response = await fetch('https://d12f-2001-2d8-7381-8b9a-4cb2-2f1d-f131-9fdf.ngrok-free.app/cube/load/all');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+        }
         const allData = await response.json();
+        console.log("Server response for all data:", allData);
         for (const [userId, data] of Object.entries(allData)) {
             if (userId !== getUserId()) {
                 const { keyword, link, faceIndex, cellIndex } = data;
@@ -170,8 +188,15 @@ async function loadAllData() {
                 }
             }
         }
+        console.log("All cube data loaded successfully.");
     } catch (error) {
         console.error("Failed to load data:", error);
+        // 에러 세부 정보 로깅 (CORS, 네트워크 문제 등)
+        if (error instanceof TypeError) {
+            console.error("Network error or CORS issue:", error.message);
+        } else if (error.message.includes("HTTP error")) {
+            console.error("Server responded with an error:", error.message);
+        }
     }
 }
 
