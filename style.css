@@ -100,11 +100,13 @@ button:hover {
     width: 100%;
     height: 100%;
     text-align: center;
-    white-space: nowrap;
+    word-wrap: break-word; /* 줄바꿈을 허용 */
     overflow: hidden;
+    white-space: normal; /* 텍스트가 줄바꿈 되도록 설정 */
 }
 
 .mesh-cell a:hover {
     color: #fff;
     background-color: rgba(255, 64, 129, 0.5);
 }
+
