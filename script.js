@@ -98,7 +98,7 @@ async function updateCube() {
 
     // 텍스트 길이에 따라 폰트 크기 조정
     if (keyword.length > 10) {
-        const fontSize = Math.max(6, 10 - Math.floor(keyword.length / 5)); // 최소 6px, 길수록 작게
+        const fontSize = Math.max(1, 10 - Math.floor(keyword.length / 5)); // 최소 6px, 길수록 작게
         linkElement.style.fontSize = `${fontSize}px`;
     }
 
@@ -176,7 +176,7 @@ async function loadAllData() {
 
                     // 텍스트 길이에 따라 폰트 크기 조정 (로드 시에도 적용)
                     if (keyword.length > 10) {
-                        const fontSize = Math.max(6, 10 - Math.floor(keyword.length / 5)); // 최소 6px
+                        const fontSize = Math.max(1, 10 - Math.floor(keyword.length / 5)); // 최소 6px
                         linkElement.style.fontSize = `${fontSize}px`;
                     }
 
