@@ -80,8 +80,8 @@ async function updateCube() {
         for (let j = 0; j < 10; j++) {
             const cell = document.createElement("div");
             cell.className = "mesh-cell";
-            cell.style.left = `${j * 20}px`;
-            cell.style.top = `${i * 20}px`;
+            cell.style.left = `${j * 40}px`; // 20px -> 40px로 두 배
+            cell.style.top = `${i * 40}px`; // 20px -> 40px로 두 배
             selectedFace.appendChild(cell);
         }
     }
@@ -98,7 +98,7 @@ async function updateCube() {
 
     // 텍스트 길이에 따라 폰트 크기 조정
     if (keyword.length > 10) {
-        const fontSize = Math.max(1, 10 - Math.floor(keyword.length / 5)); // 최소 6px, 길수록 작게
+        const fontSize = Math.max(6, 20 - Math.floor(keyword.length / 5)); // 기본 20px, 최소 6px
         linkElement.style.fontSize = `${fontSize}px`;
     }
 
@@ -157,8 +157,8 @@ async function loadAllData() {
                     for (let j = 0; j < 10; j++) {
                         const cell = document.createElement("div");
                         cell.className = "mesh-cell";
-                        cell.style.left = `${j * 20}px`;
-                        cell.style.top = `${i * 20}px`;
+                        cell.style.left = `${j * 40}px`; // 20px -> 40px로 두 배
+                        cell.style.top = `${i * 40}px`; // 20px -> 40px로 두 배
                         selectedFace.appendChild(cell);
                     }
                 }
@@ -176,7 +176,7 @@ async function loadAllData() {
 
                     // 텍스트 길이에 따라 폰트 크기 조정 (로드 시에도 적용)
                     if (keyword.length > 10) {
-                        const fontSize = Math.max(1, 10 - Math.floor(keyword.length / 5)); // 최소 6px
+                        const fontSize = Math.max(6, 20 - Math.floor(keyword.length / 5)); // 기본 20px, 최소 6px
                         linkElement.style.fontSize = `${fontSize}px`;
                     }
 
