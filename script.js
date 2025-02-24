@@ -110,7 +110,7 @@ async function updateCube() {
     const cubeData = { keyword, link, userId, faceIndex: newFaceIndex, cellIndex: newCellIndex };
     try {
         console.log("Attempting to save data to server with data:", cubeData);
-        const response = await fetch('https://new-subdomain.ngrok-free.app/cube/save', { // 새 ngrok URL로 변경
+        const response = await fetch('https://cd90-2001-2d8-7381-8b9a-6cf1-5464-b95a-8960.ngrok-free.app/cube/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(cubeData)
@@ -142,7 +142,7 @@ async function updateCube() {
 async function loadAllData() {
     try {
         console.log("Attempting to load all cube data from server...");
-        const response = await fetch('https://cd90-2001-2d8-7381-8b9a-6cf1-5464-b95a-8960.ngrok-free.app/cube/load/all'); // 새 ngrok URL로 변경
+        const response = await fetch('https://cd90-2001-2d8-7381-8b9a-6cf1-5464-b95a-8960.ngrok-free.app/cube/load/all');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
         }
