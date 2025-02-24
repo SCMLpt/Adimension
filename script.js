@@ -48,46 +48,8 @@ document.addEventListener("mouseleave", () => {
     isDragging = false;
 });
 
-// 페이지 로드 시 저장된 데이터 복원 (영구적으로 유지)
-window.onload = function() {
-    const userId = getUserId();
-    const savedData = localStorage.getItem(`cubeData_${userId}`);
-    if (savedData) {
-        const { keyword, link, faceIndex, cellIndex } = JSON.parse(savedData);
-        const faces = document.getElementsByClassName("face");
-        const selectedFace = faces[faceIndex];
-        selectedFace.innerHTML = "";
-
-        // 10x10 메시 생성
-        for (let i = 0; i < 10; i++) {
-            for (let j = 0; j < 10; j++) {
-                const cell = document.createElement("div");
-                cell.className = "mesh-cell";
-                cell.style.left = `${j * 20}px`;
-                cell.style.top = `${i * 20}px`;
-                selectedFace.appendChild(cell);
-            }
-        }
-
-        const cells = selectedFace.getElementsByClassName("mesh-cell");
-        const selectedCell = cells[cellIndex];
-
-        // 링크 요소 생성
-        const linkElement = document.createElement("a");
-        linkElement.href = link;
-        linkElement.textContent = keyword;
-        linkElement.target = "_blank";
-        linkElement.style.pointerEvents = "auto";
-        linkElement.addEventListener("click", (e) => {
-            console.log("Link clicked:", link);
-            e.stopPropagation();
-        });
-        selectedCell.appendChild(linkElement);
-    }
-};
-
-// 텍스트 업데이트 함수
-function updateCube() {
+// 텍스트 업데이트 및 서버 저장 함수
+async function updateCube() {
     const keyword = document.getElementById("keywordInput").value.trim();
     let link = document.getElementById("linkInput").value.trim();
 
@@ -96,35 +58,28 @@ function updateCube() {
         return;
     }
 
-    // 링크가 http 또는 https로 시작하지 않으면 추가
     if (!link.startsWith("http://") && !link.startsWith("https://")) {
         link = "https://" + link;
     }
 
     const userId = getUserId();
-    const savedData = localStorage.getItem(`cubeData_${userId}`);
+    const savedData = localStorage.getItem(`cubeData_${userId}`) || '{}';
+    const { faceIndex, cellIndex } = JSON.parse(savedData);
 
-    // 모든 면 가져오기
-    const faces = document.getElementsByClassName("face");
-
-    let selectedFace, faceIndex, cellIndex;
-    if (savedData) {
-        // 기존 데이터가 있으면 같은 위치 사용
-        const { faceIndex: oldFaceIndex, cellIndex: oldCellIndex } = JSON.parse(savedData);
-        faceIndex = oldFaceIndex;
-        cellIndex = oldCellIndex;
-        selectedFace = faces[faceIndex];
+    let selectedFace, newFaceIndex, newCellIndex;
+    if (faceIndex !== undefined && cellIndex !== undefined) {
+        // 기존 위치 유지
+        newFaceIndex = faceIndex;
+        newCellIndex = cellIndex;
+        selectedFace = document.getElementsByClassName("face")[faceIndex];
     } else {
         // 새 데이터면 랜덤 위치 선택
-        faceIndex = Math.floor(Math.random() * faces.length);
-        selectedFace = faces[faceIndex];
-        cellIndex = Math.floor(Math.random() * 100); // 10x10 = 100 셀
+        newFaceIndex = Math.floor(Math.random() * 6);
+        newCellIndex = Math.floor(Math.random() * 100); // 10x10 = 100 셀
+        selectedFace = document.getElementsByClassName("face")[newFaceIndex];
     }
 
-    // 기존 메시 제거
     selectedFace.innerHTML = "";
-
-    // 10x10 메시 생성
     for (let i = 0; i < 10; i++) {
         for (let j = 0; j < 10; j++) {
             const cell = document.createElement("div");
@@ -135,14 +90,10 @@ function updateCube() {
         }
     }
 
-    // 메시의 셀들 가져오기
     const cells = selectedFace.getElementsByClassName("mesh-cell");
-    const selectedCell = cells[cellIndex];
-
-    // 기존 링크 제거 (필요 시)
+    const selectedCell = cells[newCellIndex];
     selectedCell.innerHTML = "";
 
-    // 링크 요소 생성
     const linkElement = document.createElement("a");
     linkElement.href = link;
     linkElement.textContent = keyword;
@@ -154,16 +105,118 @@ function updateCube() {
     });
     selectedCell.appendChild(linkElement);
 
-    // 데이터 영구 저장 (localStorage 사용)
-    const cubeData = {
-        keyword,
-        link,
-        faceIndex,
-        cellIndex
-    };
-    localStorage.setItem(`cubeData_${userId}`, JSON.stringify(cubeData));
+    // 서버에 데이터 저장 (제공된 ngrok 주소 사용)
+    const cubeData = { keyword, link, userId, faceIndex: newFaceIndex, cellIndex: newCellIndex };
+    try {
+        await fetch('https://d12f-2001-2d8-7381-8b9a-4cb2-2f1d-f131-9fdf.ngrok-free.app/cube/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cubeData)
+        });
+        // 로컬 저장소에도 백업 (안정성 확보)
+        localStorage.setItem(`cubeData_${userId}`, JSON.stringify(cubeData));
+    } catch (error) {
+        console.error("Failed to save data:", error);
+    }
 
     // 입력창 초기화
     document.getElementById("keywordInput").value = "";
     document.getElementById("linkInput").value = "";
 }
+
+// 페이지 로드 시 모든 사용자 데이터 로드
+async function loadAllData() {
+    try {
+        const response = await fetch('https://d12f-2001-2d8-7381-8b9a-4cb2-2f1d-f131-9fdf.ngrok-free.app/cube/load/all');
+        const allData = await response.json();
+        for (const [userId, data] of Object.entries(allData)) {
+            if (userId !== getUserId()) {
+                const { keyword, link, faceIndex, cellIndex } = data;
+                const faces = document.getElementsByClassName("face");
+                if (faceIndex < faces.length) {
+                    const selectedFace = faces[faceIndex];
+                    selectedFace.innerHTML = "";
+
+                    for (let i = 0; i < 10; i++) {
+                        for (let j = 0; j < 10; j++) {
+                            const cell = document.createElement("div");
+                            cell.className = "mesh-cell";
+                            cell.style.left = `${j * 20}px`;
+                            cell.style.top = `${i * 20}px`;
+                            selectedFace.appendChild(cell);
+                        }
+                    }
+
+                    const cells = selectedFace.getElementsByClassName("mesh-cell");
+                    if (cellIndex < cells.length) {
+                        const selectedCell = cells[cellIndex];
+                        selectedCell.innerHTML = "";
+
+                        const linkElement = document.createElement("a");
+                        linkElement.href = link;
+                        linkElement.textContent = keyword;
+                        linkElement.target = "_blank";
+                        linkElement.style.pointerEvents = "auto";
+                        linkElement.addEventListener("click", (e) => {
+                            console.log("Link clicked:", link);
+                            e.stopPropagation();
+                        });
+                        selectedCell.appendChild(linkElement);
+                    } else {
+                        console.warn(`Invalid cellIndex ${cellIndex} for user ${userId}`);
+                    }
+                } else {
+                    console.warn(`Invalid faceIndex ${faceIndex} for user ${userId}`);
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Failed to load data:", error);
+    }
+}
+
+// 페이지 로드 시 데이터 로드
+window.onload = function() {
+    loadAllData();
+    const userId = getUserId();
+    const savedData = localStorage.getItem(`cubeData_${userId}`);
+    if (savedData) {
+        const { keyword, link, faceIndex, cellIndex } = JSON.parse(savedData);
+        const faces = document.getElementsByClassName("face");
+        if (faceIndex < faces.length) {
+            const selectedFace = faces[faceIndex];
+            selectedFace.innerHTML = "";
+
+            for (let i = 0; i < 10; i++) {
+                for (let j = 0; j < 10; j++) {
+                    const cell = document.createElement("div");
+                    cell.className = "mesh-cell";
+                    cell.style.left = `${j * 20}px`;
+                    cell.style.top = `${i * 20}px`;
+                    selectedFace.appendChild(cell);
+                }
+            }
+
+            const cells = selectedFace.getElementsByClassName("mesh-cell");
+            if (cellIndex < cells.length) {
+                const selectedCell = cells[cellIndex];
+                selectedCell.innerHTML = "";
+
+                const linkElement = document.createElement("a");
+                linkElement.href = link;
+                linkElement.textContent = keyword;
+                linkElement.target = "_blank";
+                linkElement.style.pointerEvents = "auto";
+                linkElement.addEventListener("click", (e) => {
+                    console.log("Link clicked:", link);
+                    e.stopPropagation();
+                });
+                selectedCell.appendChild(linkElement);
+            } else {
+                console.warn(`Invalid cellIndex ${cellIndex} for user ${userId}`);
+            }
+        } else {
+            console.warn(`Invalid faceIndex ${faceIndex} for user ${userId}`);
+        }
+    }
+};
