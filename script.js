@@ -95,6 +95,13 @@ async function updateCube() {
     linkElement.textContent = keyword;
     linkElement.target = "_blank";
     linkElement.style.pointerEvents = "auto";
+
+    // 텍스트 길이에 따라 폰트 크기 조정
+    if (keyword.length > 10) {
+        const fontSize = Math.max(6, 10 - Math.floor(keyword.length / 5)); // 최소 6px, 길수록 작게
+        linkElement.style.fontSize = `${fontSize}px`;
+    }
+
     linkElement.addEventListener("click", (e) => {
         console.log("Link clicked:", link);
         e.stopPropagation();
@@ -166,6 +173,13 @@ async function loadAllData() {
                     linkElement.textContent = keyword;
                     linkElement.target = "_blank";
                     linkElement.style.pointerEvents = "auto";
+
+                    // 텍스트 길이에 따라 폰트 크기 조정 (로드 시에도 적용)
+                    if (keyword.length > 10) {
+                        const fontSize = Math.max(6, 10 - Math.floor(keyword.length / 5)); // 최소 6px
+                        linkElement.style.fontSize = `${fontSize}px`;
+                    }
+
                     linkElement.addEventListener("click", (e) => {
                         console.log("Link clicked:", link);
                         e.stopPropagation();
