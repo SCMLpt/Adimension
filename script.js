@@ -48,13 +48,15 @@ document.addEventListener("mouseleave", () => {
     isDragging = false;
 });
 
-// 텍스트 크기 조절 함수
+// 텍스트 크기 조절 함수 (줄바꿈 고려)
 function adjustFontSize(element) {
     let fontSize = 10; // 초기 폰트 크기
     element.style.fontSize = fontSize + "px";
     const parentWidth = element.parentElement.offsetWidth;
+    const parentHeight = element.parentElement.offsetHeight;
 
-    while (element.scrollWidth > parentWidth && fontSize > 4) {
+    // 텍스트가 셀 범위를 벗어나지 않도록 폰트 크기를 줄임
+    while ((element.scrollWidth > parentWidth || element.scrollHeight > parentHeight) && fontSize > 4) {
         fontSize--;
         element.style.fontSize = fontSize + "px";
     }
