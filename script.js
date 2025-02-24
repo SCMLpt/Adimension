@@ -5,14 +5,14 @@ let previousY = 0;
 let rotationX = 0;
 let rotationY = 0;
 
-// 고유 사용자 ID 생성 (IP 대신 사용)
+// 고유 사용자 ID 생성
 function getUserId() {
     let userId = localStorage.getItem("userId");
     if (!userId) {
-        userId = "user_" + Math.random().toString(36).substr(2, 9); // 랜덤 고유 ID
+        userId = "user_" + Math.random().toString(36).substr(2, 9);
         localStorage.setItem("userId", userId);
     }
-    console.log("Current userId:", userId); // 디버깅 로그 추가
+    console.log("Current userId:", userId);
     return userId;
 }
 
@@ -22,7 +22,7 @@ cube.addEventListener("mousedown", (e) => {
         isDragging = true;
         previousX = e.clientX;
         previousY = e.clientY;
-        e.preventPropagation(); // Prevent default behavior
+        e.preventPropagation();
     }
 });
 
@@ -30,12 +30,9 @@ document.addEventListener("mousemove", (e) => {
     if (isDragging) {
         const deltaX = e.clientX - previousX;
         const deltaY = e.clientY - previousY;
-
         rotationY += deltaX * 0.5;
         rotationX -= deltaY * 0.5;
-
         cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
-
         previousX = e.clientX;
         previousY = e.clientY;
     }
@@ -69,14 +66,12 @@ async function updateCube() {
 
     let selectedFace, newFaceIndex, newCellIndex;
     if (faceIndex !== undefined && cellIndex !== undefined) {
-        // 기존 위치 유지
         newFaceIndex = faceIndex;
         newCellIndex = cellIndex;
         selectedFace = document.getElementsByClassName("face")[faceIndex];
     } else {
-        // 새 데이터면 랜덤 위치 선택
         newFaceIndex = Math.floor(Math.random() * 6);
-        newCellIndex = Math.floor(Math.random() * 100); // 10x10 = 100 셀
+        newCellIndex = Math.floor(Math.random() * 100);
         selectedFace = document.getElementsByClassName("face")[newFaceIndex];
     }
 
@@ -106,11 +101,10 @@ async function updateCube() {
     });
     selectedCell.appendChild(linkElement);
 
-    // 서버에 데이터 저장 (ngrok URL 사용)
     const cubeData = { keyword, link, userId, faceIndex: newFaceIndex, cellIndex: newCellIndex };
     try {
         console.log("Attempting to save data to server with data:", cubeData);
-        const response = await fetch('https://08b8-2001-2d8-7381-8b9a-6cf1-5464-b95a-8960.ngrok-free.app/cube/save', {
+        const response = await fetch('http://localhost:5001/cube/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(cubeData)
@@ -120,28 +114,21 @@ async function updateCube() {
         }
         const data = await response.json();
         console.log("Server response for save:", data);
-        // 로컬 저장소에도 백업 (안정성 확보)
         localStorage.setItem(`cubeData_${userId}`, JSON.stringify(cubeData));
         console.log("Data saved to localStorage successfully.");
     } catch (error) {
         console.error("Failed to save data:", error);
-        if (error instanceof TypeError) {
-            console.error("Network error or CORS issue:", error.message);
-        } else if (error.message.includes("HTTP error")) {
-            console.error("Server responded with an error:", error.message);
-        }
     }
 
-    // 입력창 초기화
     document.getElementById("keywordInput").value = "";
     document.getElementById("linkInput").value = "";
 }
 
-// 페이지 로드 시 모든 사용자 데이터 로드 (ngrok URL 사용)
+// 모든 사용자 데이터 로드
 async function loadAllData() {
     try {
         console.log("Attempting to load all cube data from server...");
-        const response = await fetch('https://08b8-2001-2d8-7381-8b9a-6cf1-5464-b95a-8960.ngrok-free.app/cube/load/all', {
+        const response = await fetch('http://localhost:5001/cube/load/all', {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });
@@ -151,119 +138,54 @@ async function loadAllData() {
         const allData = await response.json();
         console.log("Server response for all data:", JSON.stringify(allData, null, 2));
 
-        // 서버에서 데이터가 없으면 테스트 데이터 추가 (디버깅용)
-        if (Object.keys(allData).length === 0) {
-            console.log("No data from server, using test data...");
-            allData["test_user"] = { keyword: "Test", link: "https://example.com", faceIndex: 0, cellIndex: 0 };
-        }
-
         for (const [userId, data] of Object.entries(allData)) {
-            if (userId !== getUserId()) {
-                console.log(`Rendering data for user ${userId}:`, data);
-                const { keyword, link, faceIndex, cellIndex } = data;
-                const faces = document.getElementsByClassName("face");
-                if (faceIndex >= 0 && faceIndex < faces.length) {
-                    const selectedFace = faces[faceIndex];
-                    selectedFace.innerHTML = "";
+            console.log(`Rendering data for user ${userId}:`, data);
+            const { keyword, link, faceIndex, cellIndex } = data;
+            const faces = document.getElementsByClassName("face");
+            if (faceIndex >= 0 && faceIndex < faces.length) {
+                const selectedFace = faces[faceIndex];
+                selectedFace.innerHTML = "";
 
-                    for (let i = 0; i < 10; i++) {
-                        for (let j = 0; j < 10; j++) {
-                            const cell = document.createElement("div");
-                            cell.className = "mesh-cell";
-                            cell.style.left = `${j * 20}px`;
-                            cell.style.top = `${i * 20}px`;
-                            selectedFace.appendChild(cell);
-                        }
+                for (let i = 0; i < 10; i++) {
+                    for (let j = 0; j < 10; j++) {
+                        const cell = document.createElement("div");
+                        cell.className = "mesh-cell";
+                        cell.style.left = `${j * 20}px`;
+                        cell.style.top = `${i * 20}px`;
+                        selectedFace.appendChild(cell);
                     }
+                }
 
-                    const cells = selectedFace.getElementsByClassName("mesh-cell");
-                    if (cellIndex >= 0 && cellIndex < cells.length) {
-                        const selectedCell = cells[cellIndex];
-                        selectedCell.innerHTML = "";
+                const cells = selectedFace.getElementsByClassName("mesh-cell");
+                if (cellIndex >= 0 && cellIndex < cells.length) {
+                    const selectedCell = cells[cellIndex];
+                    selectedCell.innerHTML = "";
 
-                        const linkElement = document.createElement("a");
-                        linkElement.href = link;
-                        linkElement.textContent = keyword;
-                        linkElement.target = "_blank";
-                        linkElement.style.pointerEvents = "auto";
-                        linkElement.addEventListener("click", (e) => {
-                            console.log("Link clicked:", link);
-                            e.stopPropagation();
-                        });
-                        selectedCell.appendChild(linkElement);
-                        console.log(`Rendered data for user ${userId} at face ${faceIndex}, cell ${cellIndex}`);
-                    } else {
-                        console.warn(`Invalid cellIndex ${cellIndex} for user ${userId} - out of range for ${cells.length} cells`);
-                    }
+                    const linkElement = document.createElement("a");
+                    linkElement.href = link;
+                    linkElement.textContent = keyword;
+                    linkElement.target = "_blank";
+                    linkElement.style.pointerEvents = "auto";
+                    linkElement.addEventListener("click", (e) => {
+                        console.log("Link clicked:", link);
+                        e.stopPropagation();
+                    });
+                    selectedCell.appendChild(linkElement);
+                    console.log(`Rendered data for user ${userId} at face ${faceIndex}, cell ${cellIndex}`);
                 } else {
-                    console.warn(`Invalid faceIndex ${faceIndex} for user ${userId} - out of range for ${faces.length} faces`);
+                    console.warn(`Invalid cellIndex ${cellIndex} for user ${userId}`);
                 }
             } else {
-                console.log(`Skipping current user's data: ${userId}`);
+                console.warn(`Invalid faceIndex ${faceIndex} for user ${userId}`);
             }
         }
-        console.log("All cube data loaded and rendered successfully.");
     } catch (error) {
         console.error("Failed to load data:", error);
-        if (error instanceof SyntaxError) {
-            console.error("JSON parsing error - Server returned invalid JSON:", error.message);
-        } else if (error instanceof TypeError) {
-            console.error("Network error or CORS issue:", error.message);
-        } else if (error.message.includes("HTTP error")) {
-            console.error("Server responded with an error:", error.message);
-        }
-        console.error("Full error object:", error);
     }
 }
 
-// 페이지 로드 시 데이터 로드 및 주기적 업데이트 설정
+// 페이지 로드 및 주기적 업데이트
 window.onload = function() {
-    // 초기 데이터 로드
     loadAllData();
-
-    // 현재 사용자 데이터 로드 (로컬 저장소에서)
-    const userId = getUserId();
-    const savedData = localStorage.getItem(`cubeData_${userId}`);
-    if (savedData) {
-        const { keyword, link, faceIndex, cellIndex } = JSON.parse(savedData);
-        const faces = document.getElementsByClassName("face");
-        if (faceIndex >= 0 && faceIndex < faces.length) {
-            const selectedFace = faces[faceIndex];
-            selectedFace.innerHTML = "";
-
-            for (let i = 0; i < 10; i++) {
-                for (let j = 0; j < 10; j++) {
-                    const cell = document.createElement("div");
-                    cell.className = "mesh-cell";
-                    cell.style.left = `${j * 20}px`;
-                    cell.style.top = `${i * 20}px`;
-                    selectedFace.appendChild(cell);
-                }
-            }
-
-            const cells = selectedFace.getElementsByClassName("mesh-cell");
-            if (cellIndex >= 0 && cellIndex < cells.length) {
-                const selectedCell = cells[cellIndex];
-                selectedCell.innerHTML = "";
-
-                const linkElement = document.createElement("a");
-                linkElement.href = link;
-                linkElement.textContent = keyword;
-                linkElement.target = "_blank";
-                linkElement.style.pointerEvents = "auto";
-                linkElement.addEventListener("click", (e) => {
-                    console.log("Link clicked:", link);
-                    e.stopPropagation();
-                });
-                selectedCell.appendChild(linkElement);
-            } else {
-                console.warn(`Invalid cellIndex ${cellIndex} for user ${userId} - out of range for ${cells.length} cells`);
-            }
-        } else {
-            console.warn(`Invalid faceIndex ${faceIndex} for user ${userId} - out of range for ${faces.length} faces`);
-        }
-    }
-
-    // 주기적으로 데이터 업데이트 (10초마다)
-    setInterval(loadAllData, 10000); // 10000ms = 10초
+    setInterval(loadAllData, 10000); // 10초마다 업데이트
 };
