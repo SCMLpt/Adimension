@@ -48,7 +48,7 @@ document.addEventListener("mouseleave", () => {
     isDragging = false;
 });
 
-// 페이지 로드 시 저장된 데이터 복원
+// 페이지 로드 시 저장된 데이터 복원 (영구적으로 유지)
 window.onload = function() {
     const userId = getUserId();
     const savedData = localStorage.getItem(`cubeData_${userId}`);
@@ -154,7 +154,7 @@ function updateCube() {
     });
     selectedCell.appendChild(linkElement);
 
-    // 데이터 저장
+    // 데이터 영구 저장 (localStorage 사용)
     const cubeData = {
         keyword,
         link,
