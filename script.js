@@ -48,7 +48,7 @@ document.addEventListener("mouseleave", () => {
     isDragging = false;
 });
 
-// 텍스트 업데이트 및 서버 저장 함수 (네트워크 문제 점검 추가)
+// 텍스트 업데이트 및 서버 저장 함수 (디버깅 강화)
 async function updateCube() {
     const keyword = document.getElementById("keywordInput").value.trim();
     let link = document.getElementById("linkInput").value.trim();
@@ -105,10 +105,10 @@ async function updateCube() {
     });
     selectedCell.appendChild(linkElement);
 
-    // 서버에 데이터 저장 (네트워크 문제 점검 추가)
+    // 서버에 데이터 저장 (디버깅 강화)
     const cubeData = { keyword, link, userId, faceIndex: newFaceIndex, cellIndex: newCellIndex };
     try {
-        console.log("Attempting to save data to server...");
+        console.log("Attempting to save data to server with data:", cubeData);
         const response = await fetch('https://d12f-2001-2d8-7381-8b9a-4cb2-2f1d-f131-9fdf.ngrok-free.app/cube/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -118,7 +118,7 @@ async function updateCube() {
             throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
         }
         const data = await response.json();
-        console.log("Server response:", data);
+        console.log("Server response for save:", data);
         // 로컬 저장소에도 백업 (안정성 확보)
         localStorage.setItem(`cubeData_${userId}`, JSON.stringify(cubeData));
         console.log("Data saved to localStorage successfully.");
@@ -137,7 +137,7 @@ async function updateCube() {
     document.getElementById("linkInput").value = "";
 }
 
-// 페이지 로드 시 모든 사용자 데이터 로드 (네트워크 문제 점검 추가)
+// 페이지 로드 시 모든 사용자 데이터 로드 (디버깅 강화)
 async function loadAllData() {
     try {
         console.log("Attempting to load all cube data from server...");
@@ -149,6 +149,7 @@ async function loadAllData() {
         console.log("Server response for all data:", allData);
         for (const [userId, data] of Object.entries(allData)) {
             if (userId !== getUserId()) {
+                console.log(`Processing data for user ${userId}:`, data);
                 const { keyword, link, faceIndex, cellIndex } = data;
                 const faces = document.getElementsByClassName("face");
                 if (faceIndex < faces.length) {
@@ -180,6 +181,7 @@ async function loadAllData() {
                             e.stopPropagation();
                         });
                         selectedCell.appendChild(linkElement);
+                        console.log(`Rendered data for user ${userId} at face ${faceIndex}, cell ${cellIndex}`);
                     } else {
                         console.warn(`Invalid cellIndex ${cellIndex} for user ${userId}`);
                     }
@@ -188,7 +190,7 @@ async function loadAllData() {
                 }
             }
         }
-        console.log("All cube data loaded successfully.");
+        console.log("All cube data loaded and rendered successfully.");
     } catch (error) {
         console.error("Failed to load data:", error);
         // 에러 세부 정보 로깅 (CORS, 네트워크 문제 등)
