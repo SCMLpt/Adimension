@@ -7,10 +7,13 @@ let rotationY = 0;
 
 // 드래그 기능
 cube.addEventListener("mousedown", (e) => {
-    isDragging = true;
-    previousX = e.clientX;
-    previousY = e.clientY;
-    e.preventDefault();
+    // 링크가 아닌 `.cube` 요소에서만 드래그 시작
+    if (e.target.className !== "mesh-cell" && e.target.tagName !== "A") {
+        isDragging = true;
+        previousX = e.clientX;
+        previousY = e.clientY;
+        e.preventDefault();
+    }
 });
 
 document.addEventListener("mousemove", (e) => {
@@ -79,6 +82,7 @@ function updateCube() {
     linkElement.href = link;
     linkElement.textContent = keyword;
     linkElement.target = "_blank"; // 새 탭에서 열리도록
+    linkElement.style.pointerEvents = "auto"; // 링크 클릭 명시적 허용
     selectedCell.appendChild(linkElement);
 
     // 입력창 초기화
