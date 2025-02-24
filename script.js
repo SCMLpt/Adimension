@@ -12,6 +12,7 @@ function getUserId() {
         userId = "user_" + Math.random().toString(36).substr(2, 9); // 랜덤 고유 ID
         localStorage.setItem("userId", userId);
     }
+    console.log("Current userId:", userId); // 디버깅 로그 추가
     return userId;
 }
 
@@ -48,7 +49,7 @@ document.addEventListener("mouseleave", () => {
     isDragging = false;
 });
 
-// 텍스트 업데이트 및 서버 저장 함수 (디버깅 강화)
+// 텍스트 업데이트 및 서버 저장 함수
 async function updateCube() {
     const keyword = document.getElementById("keywordInput").value.trim();
     let link = document.getElementById("linkInput").value.trim();
@@ -105,7 +106,7 @@ async function updateCube() {
     });
     selectedCell.appendChild(linkElement);
 
-    // 서버에 데이터 저장 (디버깅 강화)
+    // 서버에 데이터 저장
     const cubeData = { keyword, link, userId, faceIndex: newFaceIndex, cellIndex: newCellIndex };
     try {
         console.log("Attempting to save data to server with data:", cubeData);
@@ -146,13 +147,15 @@ async function loadAllData() {
             throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
         }
         const allData = await response.json();
-        console.log("Server response for all data:", allData);
+        console.log("Server response for all data (raw):", JSON.stringify(allData, null, 2));
         for (const [userId, data] of Object.entries(allData)) {
+            console.log(`Processing data for user ${userId}:`, data);
             if (userId !== getUserId()) {
-                console.log(`Processing data for user ${userId}:`, data);
+                console.log(`Rendering data for user ${userId} (not current user):`, data);
                 const { keyword, link, faceIndex, cellIndex } = data;
+                console.log(`Rendering data: keyword=${keyword}, link=${link}, faceIndex=${faceIndex}, cellIndex=${cellIndex}`);
                 const faces = document.getElementsByClassName("face");
-                if (faceIndex < faces.length) {
+                if (faceIndex >= 0 && faceIndex < faces.length) {
                     const selectedFace = faces[faceIndex];
                     selectedFace.innerHTML = "";
 
@@ -167,7 +170,7 @@ async function loadAllData() {
                     }
 
                     const cells = selectedFace.getElementsByClassName("mesh-cell");
-                    if (cellIndex < cells.length) {
+                    if (cellIndex >= 0 && cellIndex < cells.length) {
                         const selectedCell = cells[cellIndex];
                         selectedCell.innerHTML = "";
 
@@ -183,11 +186,13 @@ async function loadAllData() {
                         selectedCell.appendChild(linkElement);
                         console.log(`Rendered data for user ${userId} at face ${faceIndex}, cell ${cellIndex}`);
                     } else {
-                        console.warn(`Invalid cellIndex ${cellIndex} for user ${userId}`);
+                        console.warn(`Invalid cellIndex ${cellIndex} for user ${userId} - out of range for ${cells.length} cells`);
                     }
                 } else {
-                    console.warn(`Invalid faceIndex ${faceIndex} for user ${userId}`);
+                    console.warn(`Invalid faceIndex ${faceIndex} for user ${userId} - out of range for ${faces.length} faces`);
                 }
+            } else {
+                console.log(`Skipping current user's data: ${userId}`);
             }
         }
         console.log("All cube data loaded and rendered successfully.");
@@ -210,7 +215,7 @@ window.onload = function() {
     if (savedData) {
         const { keyword, link, faceIndex, cellIndex } = JSON.parse(savedData);
         const faces = document.getElementsByClassName("face");
-        if (faceIndex < faces.length) {
+        if (faceIndex >= 0 && faceIndex < faces.length) {
             const selectedFace = faces[faceIndex];
             selectedFace.innerHTML = "";
 
@@ -225,7 +230,7 @@ window.onload = function() {
             }
 
             const cells = selectedFace.getElementsByClassName("mesh-cell");
-            if (cellIndex < cells.length) {
+            if (cellIndex >= 0 && cellIndex < cells.length) {
                 const selectedCell = cells[cellIndex];
                 selectedCell.innerHTML = "";
 
@@ -240,10 +245,10 @@ window.onload = function() {
                 });
                 selectedCell.appendChild(linkElement);
             } else {
-                console.warn(`Invalid cellIndex ${cellIndex} for user ${userId}`);
+                console.warn(`Invalid cellIndex ${cellIndex} for user ${userId} - out of range for ${cells.length} cells`);
             }
         } else {
-            console.warn(`Invalid faceIndex ${faceIndex} for user ${userId}`);
+            console.warn(`Invalid faceIndex ${faceIndex} for user ${userId} - out of range for ${faces.length} faces`);
         }
     }
 };
