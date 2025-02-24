@@ -53,7 +53,7 @@ button:hover {
     transform-style: preserve-3d;
     transition: transform 0.1s;
     cursor: grab;
-    pointer-events: auto; /* 클릭 가능하도록 설정 */
+    pointer-events: auto;
 }
 
 .cube:active {
@@ -66,7 +66,7 @@ button:hover {
     height: 200px;
     background-color: rgba(100, 149, 237, 0.8);
     border: 1px solid #fff;
-    pointer-events: auto; /* 클릭 가능하도록 명시 */
+    pointer-events: auto;
 }
 
 .front  { transform: translateZ(100px); }
@@ -90,7 +90,7 @@ button:hover {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    pointer-events: auto; /* 클릭 가능하도록 명시 */
+    pointer-events: auto;
 }
 
 /* 링크 스타일 */
@@ -104,7 +104,7 @@ button:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    pointer-events: auto; /* 링크 클릭 가능하도록 명시 */
+    pointer-events: auto;
 }
 
 .mesh-cell a:hover {
