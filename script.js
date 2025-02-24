@@ -106,7 +106,7 @@ async function updateCube() {
     });
     selectedCell.appendChild(linkElement);
 
-    // 서버에 데이터 저장
+    // 서버에 데이터 저장 (새 ngrok URL 사용)
     const cubeData = { keyword, link, userId, faceIndex: newFaceIndex, cellIndex: newCellIndex };
     try {
         console.log("Attempting to save data to server with data:", cubeData);
@@ -138,11 +138,11 @@ async function updateCube() {
     document.getElementById("linkInput").value = "";
 }
 
-// 페이지 로드 시 모든 사용자 데이터 로드
+// 페이지 로드 시 모든 사용자 데이터 로드 (새 ngrok URL 사용)
 async function loadAllData() {
     try {
         console.log("Attempting to load all cube data from server...");
-        const response = await fetch('https://d12f-2001-2d8-7381-8b9a-4cb2-2f1d-f131-9fdf.ngrok-free.app/cube/load/all');
+        const response = await fetch('https://a45a-2001-2d8-7381-8b9a-4cb2-2f1d-f131-9fdf.ngrok-free.app/cube/load/all');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
         }
