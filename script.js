@@ -40,7 +40,7 @@ document.addEventListener("mouseleave", () => {
 });
 
 // 텍스트 업데이트 함수
-function updateCube() {
+function updateCube(){
     const keyword = document.getElementById("keywordInput").value.trim();
     const link = document.getElementById("linkInput").value.trim();
 
