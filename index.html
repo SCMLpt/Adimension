@@ -1,26 +1,17 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adimension - 인터랙티브 큐브</title>
+    <title>3D Cube Keyword & Link Display</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Adimension 큐브 탐험하기</h1>
-        <div class="input-group">
-            <input type="text" id="keywordInput" placeholder="키워드를 입력하세요">
-            <input type="text" id="linkInput" placeholder="링크를 입력하세요 (예: https://example.com)">
-            <select id="emojiSelect">
-                <option value="">이모지 선택</option>
-                <option value="😀">😀</option>
-                <option value="🚀">🚀</option>
-                <option value="🌟">🌟</option>
-                <option value="🎉">🎉</option>
-            </select>
-            <button onclick="updateCube()">추가</button>
-        </div>
+        <h1>Display Keyword & Link on a 3D Cube</h1>
+        <input type="text" id="keywordInput" placeholder="Enter keyword here" />
+        <input type="text" id="linkInput" placeholder="Enter link here (e.g., https://example.com)" />
+        <button onclick="updateCube()">Submit</button>
         <div class="cube-container">
             <div id="cube" class="cube">
                 <div class="face front"></div>
