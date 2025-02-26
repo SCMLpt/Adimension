@@ -1,5 +1,3 @@
-/* style.css */
-
 body {
     font-family: Arial, sans-serif;
     display: flex;
@@ -16,30 +14,45 @@ body {
 }
 
 h1 {
-    font-size: 24px;
+    font-size: 28px;
+    margin-bottom: 30px;
+}
+
+.input-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-bottom: 20px;
 }
 
-input {
-    padding: 10px;
+input, select {
+    padding: 12px;
     font-size: 16px;
     width: 200px;
-    margin: 5px;
+    margin: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 button {
-    padding: 10px 20px;
+    padding: 12px 24px;
     font-size: 16px;
     cursor: pointer;
     background-color: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
-    margin-top: 10px;
+    transition: transform 0.2s, background-color 0.3s;
 }
 
 button:hover {
     background-color: #45a049;
+    transform: scale(1.05);
+}
+
+button:active {
+    transform: scale(0.95);
 }
 
 .cube-container {
@@ -50,8 +63,8 @@ button:hover {
 
 .cube {
     position: relative;
-    width: 200px;
-    height: 200px;
+    width: 300px;
+    height: 300px;
     transform-style: preserve-3d;
     transition: transform 0.1s;
     cursor: grab;
@@ -64,21 +77,20 @@ button:hover {
 
 .face {
     position: absolute;
-    width: 200px;
-    height: 200px;
+    width: 300px;
+    height: 300px;
     background-color: rgba(100, 149, 237, 0.8);
     border: 1px solid #fff;
     pointer-events: auto;
 }
 
-.front  { transform: translateZ(100px); }
-.back   { transform: translateZ(-100px) rotateY(180deg); }
-.left   { transform: translateX(-100px) rotateY(-90deg); }
-.right  { transform: translateX(100px) rotateY(90deg); }
-.top    { transform: translateY(-100px) rotateX(90deg); }
-.bottom { transform: translateY(100px) rotateX(-90deg); }
+.front  { transform: translateZ(150px); }
+.back   { transform: translateZ(-150px) rotateY(180deg); }
+.left   { transform: translateX(-150px) rotateY(-90deg); }
+.right  { transform: translateX(150px) rotateY(90deg); }
+.top    { transform: translateY(-150px) rotateX(90deg); }
+.bottom { transform: translateY(150px) rotateX(-90deg); }
 
-/* 10x10 메시의 작은 사각형 스타일 */
 .mesh-cell {
     position: absolute;
     width: 20px;
@@ -91,7 +103,6 @@ button:hover {
     pointer-events: auto;
 }
 
-/* 링크 스타일 */
 .mesh-cell a {
     color: #ffeb3b;
     text-decoration: none;
@@ -100,9 +111,9 @@ button:hover {
     width: 100%;
     height: 100%;
     text-align: center;
-    word-wrap: break-word; /* 줄바꿈을 허용 */
+    word-wrap: break-word;
     overflow: hidden;
-    white-space: normal; /* 텍스트가 줄바꿈 되도록 설정 */
+    white-space: normal;
 }
 
 .mesh-cell a:hover {
