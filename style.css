@@ -1,0 +1,112 @@
+/* style.css */
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+    overflow: hidden;
+}
+
+.container {
+    text-align: center;
+}
+
+h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+input {
+    padding: 10px;
+    font-size: 16px;
+    width: 200px;
+    margin: 5px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.cube-container {
+    perspective: 1000px;
+    margin-top: 50px;
+    user-select: none;
+}
+
+.cube {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    transform-style: preserve-3d;
+    transition: transform 0.1s;
+    cursor: grab;
+    pointer-events: auto;
+}
+
+.cube:active {
+    cursor: grabbing;
+}
+
+.face {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background-color: rgba(100, 149, 237, 0.8);
+    border: 1px solid #fff;
+    pointer-events: auto;
+}
+
+.front  { transform: translateZ(100px); }
+.back   { transform: translateZ(-100px) rotateY(180deg); }
+.left   { transform: translateX(-100px) rotateY(-90deg); }
+.right  { transform: translateX(100px) rotateY(90deg); }
+.top    { transform: translateY(-100px) rotateX(90deg); }
+.bottom { transform: translateY(100px) rotateX(-90deg); }
+
+/* 10x10 메시의 작은 사각형 스타일 */
+.mesh-cell {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+/* 링크 스타일 */
+.mesh-cell a {
+    color: #ffeb3b;
+    text-decoration: none;
+    font-size: 10px;
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    word-wrap: break-word; /* 줄바꿈을 허용 */
+    overflow: hidden;
+    white-space: normal; /* 텍스트가 줄바꿈 되도록 설정 */
+}
+
+.mesh-cell a:hover {
+    color: #fff;
+    background-color: rgba(255, 64, 129, 0.5);
+}
+
