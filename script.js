@@ -1,95 +1,94 @@
-body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f0f0f0;
+const cube = document.getElementById("cube");
+let isDragging = false;
+let previousX = 0;
+let previousY = 0;
+let rotationX = 0;
+let rotationY = 0;
+
+// 큐브 회전 이벤트
+cube.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    previousX = e.clientX;
+    previousY = e.clientY;
+});
+
+document.addEventListener("mousemove", (e) => {
+    if (isDragging) {
+        const deltaX = e.clientX - previousX;
+        const deltaY = e.clientY - previousY;
+        rotationY += deltaX * 0.5;
+        rotationX -= deltaY * 0.5;
+        cube.style.transform = `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`;
+        previousX = e.clientX;
+        previousY = e.clientY;
+    }
+});
+
+document.addEventListener("mouseup", () => {
+    isDragging = false;
+});
+
+// 폰트 크기 조절 함수
+function adjustFontSize(element) {
+    let fontSize = 12;
+    element.style.fontSize = fontSize + "px";
+    while (element.scrollHeight > element.offsetHeight && fontSize > 4) {
+        fontSize--;
+        element.style.fontSize = fontSize + "px";
+    }
 }
 
-.container {
-    text-align: center;
+// 데이터 로드 및 렌더링
+function loadCubeData() {
+    const savedData = JSON.parse(localStorage.getItem("cubeData")) || {};
+    for (const faceIndex in savedData) {
+        const face = document.getElementsByClassName("face")[faceIndex];
+        face.innerHTML = "";
+        for (let i = 0; i < 10; i++) {
+            for (let j = 0; j < 10; j++) {
+                const cell = document.createElement("div");
+                cell.className = "mesh-cell";
+                cell.style.left = `${j * 30}px`;
+                cell.style.top = `${i * 30}px`;
+                face.appendChild(cell);
+            }
+        }
+        const faceData = savedData[faceIndex];
+        for (const data of faceData) {
+            const { keyword, link, emoji, cellIndex } = data;
+            const cells = face.getElementsByClassName("mesh-cell");
+            const selectedCell = cells[cellIndex];
+            if (selectedCell) {
+                selectedCell.innerHTML = `<a href="${link}" target="_blank">${emoji} ${keyword}</a>`;
+                adjustFontSize(selectedCell.querySelector("a"));
+            }
+        }
+    }
 }
 
-h1 {
-    font-size: 28px;
-    margin-bottom: 20px;
-    color: #333;
+// 큐브 업데이트 함수
+async function updateCube() {
+    const keyword = document.getElementById("keywordInput").value;
+    const link = document.getElementById("linkInput").value;
+    const emoji = document.getElementById("emojiSelect").value;
+    if (!keyword || !link || !emoji) {
+        alert("모든 필드를 채워주세요!");
+        return;
+    }
+
+    let savedData = JSON.parse(localStorage.getItem("cubeData")) || {};
+    let faceIndex, cellIndex;
+    do {
+        faceIndex = Math.floor(Math.random() * 6);
+        if (!savedData[faceIndex]) savedData[faceIndex] = [];
+        cellIndex = Math.floor(Math.random() * 100);
+    } while (savedData[faceIndex].some(data => data.cellIndex === cellIndex));
+
+    const newData = { keyword, link, emoji, cellIndex };
+    savedData[faceIndex].push(newData);
+    localStorage.setItem("cubeData", JSON.stringify(savedData));
+    loadCubeData(); // 큐브 다시 렌더링
 }
 
-.input-group {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-input, select {
-    padding: 10px;
-    margin: 0 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-button {
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-
-button:hover {
-    transform: scale(1.05);
-}
-
-button:active {
-    transform: scale(0.95);
-}
-
-.cube-container {
-    perspective: 1000px;
-}
-
-.cube {
-    position: relative;
-    width: 300px;
-    height: 300px;
-    transform-style: preserve-3d;
-    transition: transform 0.1s;
-}
-
-.face {
-    position: absolute;
-    width: 300px;
-    height: 300px;
-    background-color: rgba(100, 149, 237, 0.8);
-    border: 1px solid #fff;
-}
-
-.front  { transform: translateZ(150px); }
-.back   { transform: translateZ(-150px) rotateY(180deg); }
-.left   { transform: translateX(-150px) rotateY(-90deg); }
-.right  { transform: translateX(150px) rotateY(90deg); }
-.top    { transform: translateY(-150px) rotateX(90deg); }
-.bottom { transform: translateY(150px) rotateX(-90deg); }
-
-.mesh-cell {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-}
-
-.mesh-cell a {
-    color: #ffeb3b;
-    text-decoration: none;
-    font-size: 12px;
-    text-align: center;
-    white-space: normal;
-}
+// 페이지 로드 시 데이터 로드
+window.onload = loadCubeData;
