@@ -1,176 +1,95 @@
-// 로컬에 저장할 큐브 데이터
-let cubeData = {};
-
-// 사용자 ID 생성
-function getUserId() {
-    let userId = localStorage.getItem("userId");
-    if (!userId) {
-        userId = "user_" + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem("userId", userId);
-    }
-    return userId;
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
 }
 
-// 텍스트 크기 조절 함수
-function adjustFontSize(element) {
-    let fontSize = 10;
-    element.style.fontSize = fontSize + "px";
-    const parentWidth = element.parentElement.offsetWidth;
-    const parentHeight = element.parentElement.offsetHeight;
-
-    while ((element.scrollWidth > parentWidth || element.scrollHeight > parentHeight) && fontSize > 4) {
-        fontSize--;
-        element.style.fontSize = fontSize + "px";
-    }
+.container {
+    text-align: center;
 }
 
-// 초기 데이터 로드 함수
-async function loadInitialData() {
-    try {
-        const response = await fetch('http://localhost:5001/cube/load/all', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        cubeData = await response.json();
-        console.log("Initial data loaded:", cubeData);
-        renderCube(); // 초기 렌더링
-    } catch (error) {
-        console.error("Failed to load initial data:", error);
-    }
+h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+    color: #333;
 }
 
-// 큐브 전체 렌더링 함수
-function renderCube() {
-    const faces = document.getElementsByClassName("face");
-    for (let faceIndex = 0; faceIndex < faces.length; faceIndex++) {
-        const face = faces[faceIndex];
-        face.innerHTML = "";
-        for (let i = 0; i < 15; i++) {
-            for (let j = 0; j < 15; j++) {
-                const cell = document.createElement("div");
-                cell.className = "mesh-cell";
-                cell.style.left = `${j * 20}px`;
-                cell.style.top = `${i * 20}px`;
-                face.appendChild(cell);
-            }
-        }
-
-        const faceData = cubeData[faceIndex];
-        if (faceData) {
-            for (const data of faceData) {
-                const { keyword, link, emoji, cellIndex } = data;
-                const cells = face.getElementsByClassName("mesh-cell");
-                const selectedCell = cells[cellIndex];
-                if (selectedCell) {
-                    selectedCell.innerHTML = `<a href="${link}" target="_blank">${emoji} ${keyword}</a>`;
-                    const linkElement = selectedCell.querySelector("a");
-                    adjustFontSize(linkElement);
-                }
-            }
-        }
-    }
+.input-group {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
 }
 
-// 주기적 업데이트 함수
-async function updateCubeData() {
-    try {
-        const response = await fetch('http://localhost:5001/cube/load/updates', {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const updates = await response.json();
-        for (const update of updates) {
-            const { faceIndex, data } = update;
-            if (!cubeData[faceIndex]) cubeData[faceIndex] = [];
-            cubeData[faceIndex].push(data);
-            renderFace(faceIndex); // 해당 면만 업데이트
-        }
-    } catch (error) {
-        console.error("Failed to update data:", error);
-    }
+input, select {
+    padding: 10px;
+    margin: 0 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
-// 특정 면 렌더링 함수
-function renderFace(faceIndex) {
-    const face = document.getElementsByClassName("face")[faceIndex];
-    if (!face) return;
-
-    face.innerHTML = "";
-    for (let i = 0; i < 15; i++) {
-        for (let j = 0; j < 15; j++) {
-            const cell = document.createElement("div");
-            cell.className = "mesh-cell";
-            cell.style.left = `${j * 20}px`;
-            cell.style.top = `${i * 20}px`;
-            face.appendChild(cell);
-        }
-    }
-
-    const faceData = cubeData[faceIndex];
-    if (faceData) {
-        for (const data of faceData) {
-            const { keyword, link, emoji, cellIndex } = data;
-            const cells = face.getElementsByClassName("mesh-cell");
-            const selectedCell = cells[cellIndex];
-            if (selectedCell) {
-                selectedCell.innerHTML = `<a href="${link}" target="_blank">${emoji} ${keyword}</a>`;
-                const linkElement = selectedCell.querySelector("a");
-                adjustFontSize(linkElement);
-            }
-        }
-    }
+button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s;
 }
 
-// 큐브 업데이트 함수 (사용자 입력 처리)
-async function updateCube() {
-    const keyword = document.getElementById("keywordInput").value.trim();
-    const link = document.getElementById("linkInput").value.trim();
-    const emoji = document.getElementById("emojiSelect").value;
-
-    if (!keyword || !link || !emoji) {
-        alert("Please enter keyword, link, and select an emoji!");
-        return;
-    }
-
-    const userId = getUserId();
-    const faceIndex = Math.floor(Math.random() * 6);
-    const cellIndex = Math.floor(Math.random() * 225); // 15x15 = 225 cells
-
-    const newData = { keyword, link, emoji, cellIndex, userId };
-
-    try {
-        const response = await fetch('http://localhost:5001/cube/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ faceIndex, data: newData })
-        });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        console.log("Data saved successfully");
-
-        // 로컬 데이터 업데이트
-        if (!cubeData[faceIndex]) cubeData[faceIndex] = [];
-        cubeData[faceIndex].push(newData);
-        renderFace(faceIndex); // 해당 면 업데이트
-    } catch (error) {
-        console.error("Failed to save data:", error);
-    }
-
-    // 입력 필드 초기화
-    document.getElementById("keywordInput").value = "";
-    document.getElementById("linkInput").value = "";
-    document.getElementById("emojiSelect").value = "";
+button:hover {
+    transform: scale(1.05);
 }
 
-// 페이지 로드 및 주기적 업데이트 설정
-window.onload = function() {
-    loadInitialData();
-    setInterval(updateCubeData, 10000); // 10초마다 업데이트
-};
+button:active {
+    transform: scale(0.95);
+}
+
+.cube-container {
+    perspective: 1000px;
+}
+
+.cube {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    transform-style: preserve-3d;
+    transition: transform 0.1s;
+}
+
+.face {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background-color: rgba(100, 149, 237, 0.8);
+    border: 1px solid #fff;
+}
+
+.front  { transform: translateZ(150px); }
+.back   { transform: translateZ(-150px) rotateY(180deg); }
+.left   { transform: translateX(-150px) rotateY(-90deg); }
+.right  { transform: translateX(150px) rotateY(90deg); }
+.top    { transform: translateY(-150px) rotateX(90deg); }
+.bottom { transform: translateY(150px) rotateX(-90deg); }
+
+.mesh-cell {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.mesh-cell a {
+    color: #ffeb3b;
+    text-decoration: none;
+    font-size: 12px;
+    text-align: center;
+    white-space: normal;
+}
