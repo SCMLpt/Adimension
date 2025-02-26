@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Cube Keyword & Link Display</title>
+    <title>3D 큐브 보물찾기</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Display Keyword & Link on a 3D Cube</h1>
-        <input type="text" id="keywordInput" placeholder="Enter keyword here" />
-        <input type="text" id="linkInput" placeholder="Enter link here (e.g., https://example.com)" />
-        <button onclick="updateCube()">Submit</button>
+        <h1>큐브를 돌려 보물을 찾아라!</h1>
+        <input type="text" id="keywordInput" placeholder="키워드를 입력하세요" />
+        <input type="text" id="linkInput" placeholder="링크를 입력하세요 (예: https://example.com)" />
+        <button onclick="updateCube()">보물 추가</button>
         <div class="cube-container">
             <div id="cube" class="cube">
                 <div class="face front"></div>
@@ -22,6 +22,11 @@
                 <div class="face bottom"></div>
             </div>
         </div>
+    </div>
+    <div class="points-display">
+        <h2>내 포인트: <span id="points">0</span></h2>
+        <h3>랭킹</h3>
+        <ul id="leaderboard"></ul>
     </div>
     <script src="script.js"></script>
 </body>
